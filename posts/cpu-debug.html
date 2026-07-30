@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="CPU 高只是现象。真正需要找到的是：哪个线程、哪段代码、为什么持续被调度。" />
+  <title>一个 C++ 进程 CPU 100% 后，我会先看什么 · Sylvaire Notes</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="../"><span class="brand-mark">S</span><span>Sylvaire Notes</span></a>
+      <nav class="nav"><a href="../#articles">文章</a><a href="../#about">关于</a><button id="themeToggle" class="icon-btn" type="button" aria-label="切换深浅色">◐</button></nav>
+    </div>
+  </header>
+  <main class="post-main">
+    <a class="post-back" href="../#articles">← 返回文章列表</a>
+    <header class="post-header">
+      <p class="eyebrow">C/C++ · Performance</p>
+      <h1>一个 C++ 进程 CPU 100% 后，我会先看什么</h1>
+      <p class="post-lead">CPU 高只是现象。真正需要找到的是：哪个线程、哪段代码、为什么持续被调度。</p>
+      <div class="post-meta"><time datetime="2026-07-06">2026-07-06</time><span>·</span><span>约 6 分钟阅读</span></div>
+    </header>
+    <article class="prose"><p>在嵌入式 Linux 上看到一个 C++ 进程长期占用一个甚至多个 CPU 核心，第一步应该从线程维度定位。</p>
+<h2>1. 找到高占用线程</h2>
+<pre><code>top -H -p &lt;pid&gt;
+pidstat -p &lt;pid&gt; -t 1</code></pre>
+<p>记录线程 TID，再把十进制 TID 转成十六进制，方便和日志中的 pthread id 或调试信息对应。</p>
+<h2>2. 用 perf 找热点</h2>
+<pre><code>perf top -p &lt;pid&gt;
+perf record -g -p &lt;pid&gt; -- sleep 20
+perf report</code></pre>
+<p>如果程序带符号，热点函数会非常直观；没有符号时也可以先判断 CPU 花在用户态、内核态还是某个共享库。</p>
+<h2>3. 高频问题模式</h2>
+<ul><li>while 循环没有 sleep / 阻塞等待；</li><li>轮询 socket 或共享内存；</li><li>日志格式化过多；</li><li>锁竞争导致大量自旋；</li><li>数据处理速率超过设计输入频率。</li></ul>
+<div class="callout"><strong>先测量，再修改。</strong>CPU 优化最忌讳凭感觉删代码。先得到热点，再验证修改是否真的降低占用。</div></article>
+  </main>
+  <script src="../assets/main.js"></script>
+</body>
+</html>
