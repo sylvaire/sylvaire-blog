@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Sylvaire Notes：记录嵌入式 Linux、C/C++、网络、CAN 与工程实践。" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>Sylvaire Notes · 嵌入式与工程实践</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="./" aria-label="Sylvaire Notes 首页">
+        <span class="brand-mark">S</span>
+        <span>Sylvaire Notes</span>
+      </a>
+      <nav class="nav" aria-label="主导航">
+        <a href="#articles">文章</a>
+        <a href="#about">关于</a>
+        <a href="https://github.com/sylvaire" target="_blank" rel="noreferrer">GitHub</a>
+        <button id="themeToggle" class="icon-btn" type="button" aria-label="切换深浅色">◐</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero container">
+      <div class="hero-copy">
+        <p class="eyebrow">Embedded · Linux · Networking</p>
+        <h1>把复杂的工程问题，<br />拆成可以验证的答案。</h1>
+        <p class="hero-desc">记录嵌入式 Linux、C/C++、CAN / CAN FD、UDP/TCP、Apollo Cyber 与问题定位实践。</p>
+        <div class="hero-actions">
+          <a class="btn primary" href="#articles">开始阅读</a>
+          <a class="btn ghost" href="https://github.com/sylvaire" target="_blank" rel="noreferrer">查看 GitHub</a>
+        </div>
+      </div>
+      <div class="terminal-card" aria-label="代码终端装饰">
+        <div class="terminal-top"><span></span><span></span><span></span></div>
+        <pre><code><span class="dim">$</span> tcpdump -i eno0 udp port 15147
+<span class="ok">listening</span> on eno0 ...
+
+<span class="dim">$</span> candump can0
+can0  131  [8]  5D 00 08 98 48 44 00 0D
+
+<span class="dim">$</span> ./debug_problem
+<span class="accent">hypothesis → capture → verify → fix</span></code></pre>
+      </div>
+    </section>
+
+    <section class="container section" id="articles">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Latest writing</p>
+          <h2>技术文章</h2>
+        </div>
+        <label class="search-wrap">
+          <span>⌕</span>
+          <input id="searchInput" type="search" placeholder="搜索文章或标签" aria-label="搜索文章" />
+        </label>
+      </div>
+
+      <div class="tag-row" id="tagRow">
+        <button class="tag active" data-tag="all">全部</button>
+        <button class="tag" data-tag="linux">Linux</button>
+        <button class="tag" data-tag="network">网络</button>
+        <button class="tag" data-tag="can">CAN</button>
+        <button class="tag" data-tag="cpp">C/C++</button>
+      </div>
+
+      <div class="article-grid" id="articleGrid">
+        <article class="article-card featured" data-tags="linux network" data-search="udp tcp linux 抓包 tcpdump wireshark 网络定位">
+          <div class="card-meta"><span>网络</span><time datetime="2026-07-30">2026-07-30</time></div>
+          <h3><a href="posts/udp-debug.html">嵌入式 Linux 下，如何系统定位 UDP 丢包问题</a></h3>
+          <p>从 socket 缓冲区、errno=11、网卡统计、抓包位置到线程调度，建立一套可重复的定位路径。</p>
+          <a class="read-more" href="posts/udp-debug.html">阅读全文 →</a>
+        </article>
+
+        <article class="article-card" data-tags="can" data-search="can canfd 雷达 中断 接口 丢数据 mcu">
+          <div class="card-meta"><span>CAN</span><time datetime="2026-07-29">2026-07-29</time></div>
+          <h3><a href="posts/can-receive-debug.html">CAN 数据发出来了，MCU 为什么收不到？</a></h3>
+          <p>用“交换接口”快速区分传感器、线路、控制器与软件配置问题，并继续收敛根因。</p>
+          <a class="read-more" href="posts/can-receive-debug.html">阅读全文 →</a>
+        </article>
+
+        <article class="article-card" data-tags="cpp linux" data-search="c++ linux cpu 占用 perf top gdb 调试 性能">
+          <div class="card-meta"><span>C/C++</span><time datetime="2026-07-06">2026-07-06</time></div>
+          <h3><a href="posts/cpu-debug.html">一个 C++ 进程 CPU 100% 后，我会先看什么</a></h3>
+          <p>从 top 到 perf，从线程级 CPU 到热点函数，让“CPU 高”变成有证据的调用栈。</p>
+          <a class="read-more" href="posts/cpu-debug.html">阅读全文 →</a>
+        </article>
+      </div>
+      <p class="empty-state" id="emptyState" hidden>没有匹配的文章。</p>
+    </section>
+
+    <section class="container section about" id="about">
+      <div>
+        <p class="eyebrow">About</p>
+        <h2>关于这个博客</h2>
+      </div>
+      <div class="about-copy">
+        <p>这里更关心“为什么”和“怎么验证”，而不是只给出一条命令。内容会覆盖嵌入式系统、Linux 网络、CAN 总线、C/C++、性能分析与自动驾驶基础设施。</p>
+        <p>所有示例尽量保留可复制的命令、判断依据与排错路径，方便在真实设备上复现。</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <span>© <span id="year"></span> Sylvaire Notes</span>
+      <span>Built as a static site · Cloudflare ready</span>
+    </div>
+  </footer>
+
+  <script src="assets/main.js"></script>
+</body>
+</html>
