@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="UDP 没有重传机制，所以“sendto 成功”不等于“对端业务一定收到”。真正有效的排查必须逐层确认。" />
+  <title>嵌入式 Linux 下，如何系统定位 UDP 丢包问题 · Sylvaire Notes</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="../"><span class="brand-mark">S</span><span>Sylvaire Notes</span></a>
+      <nav class="nav"><a href="../#articles">文章</a><a href="../#about">关于</a><button id="themeToggle" class="icon-btn" type="button" aria-label="切换深浅色">◐</button></nav>
+    </div>
+  </header>
+  <main class="post-main">
+    <a class="post-back" href="../#articles">← 返回文章列表</a>
+    <header class="post-header">
+      <p class="eyebrow">Linux · Networking</p>
+      <h1>嵌入式 Linux 下，如何系统定位 UDP 丢包问题</h1>
+      <p class="post-lead">UDP 没有重传机制，所以“sendto 成功”不等于“对端业务一定收到”。真正有效的排查必须逐层确认。</p>
+      <div class="post-meta"><time datetime="2026-07-30">2026-07-30</time><span>·</span><span>约 6 分钟阅读</span></div>
+    </header>
+    <article class="prose"><p>遇到 UDP 数据偶发丢失时，我通常先把问题拆成四段：发送进程、内核网络栈、物理链路、接收进程。每一段都要有独立证据。</p>
+<h2>1. 先确认 sendto 的返回值</h2>
+<p>第一步不是抓包，而是检查 <code>sendto()</code> 是否真的把数据交给内核。</p>
+<pre><code>ssize_t n = sendto(fd, buf, len, 0,
+                   (struct sockaddr *)&amp;addr, sizeof(addr));
+if (n &lt; 0) {
+    perror("sendto");
+}</code></pre>
+<p>若出现 <code>errno=11 / EAGAIN</code>，通常说明非阻塞 socket 暂时无法继续发送。此时应继续检查 socket 发送缓冲、发送频率和线程调度，而不是把问题归因给网络对端。</p>
+<h2>2. 在发送网卡抓包</h2>
+<pre><code>tcpdump -i eno0 -ennvv udp and host 192.168.55.63
+tcpdump -i eno0 -w udp_debug.pcap udp port 15147</code></pre>
+<p>如果网卡侧完全看不到数据，问题仍在本机；如果能看到，就把观察点向链路和接收端移动。</p>
+<div class="callout"><strong>关键原则：</strong>抓包点越靠近物理网卡，越能判断数据是否真的离开主机。</div>
+<h2>3. 检查内核和网卡统计</h2>
+<pre><code>ip -s link show eno0
+ss -u -a -n -i
+netstat -su</code></pre>
+<p>重点关注 dropped、errors、receive buffer errors、send buffer errors。这些计数器比业务日志更接近网络栈真实状态。</p>
+<h2>4. 最后再看业务线程</h2>
+<p>如果 tcpdump 已经收到数据，但业务线程没有处理，就继续看 epoll/select 逻辑、socket 绑定地址、接收缓冲、线程优先级和 CPU 占用。</p>
+<p>一个稳定的定位方法，不是“多试几个参数”，而是让每一步都能够排除一层可能性。</p></article>
+  </main>
+  <script src="../assets/main.js"></script>
+</body>
+</html>
