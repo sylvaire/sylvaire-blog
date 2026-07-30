@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="当 CAN 盒已经确认总线上有报文，而 MCU 的接收中断计数不增长时，交换接口往往是非常高价值的一步。" />
+  <title>CAN 数据发出来了，MCU 为什么收不到？ · Sylvaire Notes</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="../"><span class="brand-mark">S</span><span>Sylvaire Notes</span></a>
+      <nav class="nav"><a href="../#articles">文章</a><a href="../#about">关于</a><button id="themeToggle" class="icon-btn" type="button" aria-label="切换深浅色">◐</button></nav>
+    </div>
+  </header>
+  <main class="post-main">
+    <a class="post-back" href="../#articles">← 返回文章列表</a>
+    <header class="post-header">
+      <p class="eyebrow">CAN · MCU</p>
+      <h1>CAN 数据发出来了，MCU 为什么收不到？</h1>
+      <p class="post-lead">当 CAN 盒已经确认总线上有报文，而 MCU 的接收中断计数不增长时，交换接口往往是非常高价值的一步。</p>
+      <div class="post-meta"><time datetime="2026-07-29">2026-07-29</time><span>·</span><span>约 6 分钟阅读</span></div>
+    </header>
+    <article class="prose"><p>假设多个雷达都接入 MCU，其中一个通道偶发停止接收。外部 CAN 分析仪确认传感器仍在正常发报文，但 MCU 对应中断计数不再增加。</p>
+<h2>交换接口的意义</h2>
+<p>把“有问题的传感器”和“正常传感器”交换 MCU 接口，可以一次改变大量变量。</p>
+<p>如果故障跟着 MCU 接口走，而不是跟着雷达走，优先怀疑控制器通道、收发器、管脚复用、过滤器配置、中断或驱动状态。</p>
+<h2>继续缩小范围</h2>
+<pre><code>1. 统计每个 CAN 控制器 RX 中断次数
+2. 读取 CAN controller error/state register
+3. 检查 bus-off / error-passive
+4. 检查 RX FIFO overflow
+5. 检查 acceptance filter
+6. 对比正常通道的初始化寄存器</code></pre>
+<div class="callout"><strong>不要只看业务层计数。</strong>最好同时统计：控制器收到多少帧、驱动上交多少帧、业务处理多少帧。</div>
+<h2>为什么“交换后故障转移”很关键</h2>
+<p>它等价于一次 A/B 实验。当雷达本体不再决定故障位置，传感器侧的可能性会大幅降低，排查焦点可以直接收敛到 MCU 接口链路。</p></article>
+  </main>
+  <script src="../assets/main.js"></script>
+</body>
+</html>
